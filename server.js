@@ -5,6 +5,10 @@
 
 const express = require('express');
 const app = express();
+const db = require('./lib/services/database');
+const missionPlanRoutes = require('./lib/routes/missionPlan');
+const metadataRoutes = require('./lib/routes/metadata');
+const { errorHandler, notFoundHandler } = require('./lib/middleware/errorHandler');
 
 // Configuration
 const PORT = process.env.PORT || 3000;
@@ -13,12 +17,18 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Connect to database on startup
+db.connect()
+  .then(() => console.log('Database connected'))
+  .catch(err => console.error('Database connection failed:', err));
+
 // Basic health check endpoint
 app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
     service: 'cassini-huygens-mcp-server',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    database: db.getConnection() ? 'connected' : 'disconnected'
   });
 });
 
@@ -28,27 +38,22 @@ app.get('/', (req, res) => {
     message: 'Cassini-Huygens MCP Server',
     version: '1.0.0',
     endpoints: {
-      health: '/health'
+      health: '/health',
+      missionPlan: '/api/mission-plan',
+      metadata: '/api/metadata'
     }
   });
 });
 
+// API Routes
+app.use('/api/metadata', metadataRoutes);
+app.use('/api/mission-plan', missionPlanRoutes);
+
 // Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    error: 'Internal Server Error',
-    message: err.message
-  });
-});
+app.use(errorHandler);
 
 // 404 handler
-app.use((req, res) => {
-  res.status(404).json({
-    error: 'Not Found',
-    message: `Route ${req.method} ${req.path} not found`
-  });
-});
+app.use(notFoundHandler);
 
 // Start server
 app.listen(PORT, () => {
