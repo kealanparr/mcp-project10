@@ -1,19 +1,24 @@
 {
-  "name": "mcp-project10",
+  "name": "cassini-huygens-mcp-server",
   "version": "1.0.0",
+  "description": "MCP server for Cassini-Huygens mission data",
   "main": "server.js",
+  "bin": {
+    "cassini-mcp-server": "./mcp-server.js"
+  },
   "directories": {
     "doc": "docs"
   },
   "scripts": {
     "start": "node server.js",
+    "mcp": "node mcp-server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": ["mcp", "cassini", "huygens", "space", "mission"],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.22.0",
     "express": "^5.1.0",
     "sqlite3": "^5.1.7"
   }
