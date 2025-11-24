@@ -31,6 +31,9 @@ coverage/
 logs/
 *.log
 
+# Exception: Keep session logs in docs
+!docs/logs/
+
 # Build output
 dist/
 build/
